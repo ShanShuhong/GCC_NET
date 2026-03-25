@@ -169,7 +169,7 @@ class GaussianBlurConv():
         x = self.FastFilter(x, sigma)
         return x
 
-
+# Retinex 增强模块 (数据流水线)
 @PIPELINES.register_module()
 class Retinex(object):
     """

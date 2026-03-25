@@ -31,7 +31,10 @@ from ..utils.transformer import PatchEmbed, PatchMerging
 #     def forward(self, A, B):
 #         fusion = self.w1 * A + self.w2 * B
 #         return fusion
-
+# - 功能讲解 : 为了防止增强过程中可能产生的虚假伪影或噪声污染特征，GCC-Net 引入了门控机制。
+# - 工作原理 :
+# - 该模块通过一个卷积层和 Sigmoid 激活函数生成一个权重图（Gate）。
+# - 这个权重图会动态地调整原始特征和增强特征的融合比例，实现自适应的信息整合。
 class  GatedFeatureFusion(nn.Module):
     def __init__(self, in_planes):
         super( GatedFeatureFusion, self).__init__()
@@ -720,7 +723,9 @@ class SwinBlock(BaseModule):
             x = _inner_forward(x)
 
         return x
-
+# 这是实现“协作”的关键。在 Cross_WindowMSA 中，模型打破了两个域之间的界限：
+# - 它使用一个域（如原始域）的特征作为 Query ，而使用另一个域（如增强域）的特征作为 Key 和 Value 来计算注意力。
+# - 这种机制促使模型在不同域之间挖掘互补信息，实现特征的深度交换。
 class Cross_SwinBlock(BaseModule):
     """"
     Args:
@@ -926,7 +931,7 @@ class SwinBlockSequence(BaseModule):
         else:
             return x, y, hw_shape, x, y, hw_shape
 
-
+# 这是 GCC-Net 的核心 Backbone，基于 Swin Transformer 架构进行了深度定制。与传统单流 Backbone 不同，它是一个 双流架构 ，同时接收并处理原始图像和增强图像的特征。
 @BACKBONES.register_module()
 class SwinFusionTransformer(BaseModule):
     """ Swin Transformer
